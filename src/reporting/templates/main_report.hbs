@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IronJail Analysis Report - {{analysis.session_id}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .threat-level-{{threat_level_color analysis.threat_assessment.threat_level}} {
+            border-left: 4px solid var(--bs-{{threat_level_color analysis.threat_assessment.threat_level}});
+        }
+        .timeline-event {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 20px;
+        }
+        .timeline-event::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 5px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--bs-primary);
+        }
+        .timeline-line {
+            position: absolute;
+            left: 14px;
+            top: 20px;
+            bottom: -10px;
+            width: 2px;
+            background: var(--bs-light);
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            overflow-x: auto;
+        }
+        .ioc-item {
+            display: inline-block;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            margin: 0.125rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+        }
+        .metric-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--bs-primary);
+        }
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--bs-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="display-6 mb-0">
+                            <i class="fas fa-shield-alt text-primary me-2"></i>
+                            IronJail Analysis Report
+                        </h1>
+                        <p class="text-muted mb-0">Session: {{analysis.session_id}}</p>
+                    </div>
+                    <div class="text-end">
+                        <div class="badge bg-{{threat_level_color analysis.threat_assessment.threat_level}} fs-6 mb-2">
+                            Threat Level: {{analysis.threat_assessment.threat_level}}/10
+                        </div>
+                        <br>
+                        <small class="text-muted">
+                            Generated: {{format_timestamp generated_at}}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Executive Summary -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card threat-level-{{threat_level_color analysis.threat_assessment.threat_level}}">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Executive Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Binary Analyzed</h6>
+                                <p class="code-block mb-3">{{analysis.binary}} {{#each analysis.args}}{{this}} {{/each}}</p>
+                                
+                                <h6>Analysis Summary</h6>
+                                <ul>
+                                    <li><strong>Duration:</strong> {{format_duration analysis.duration}}</li>
+                                    <li><strong>Exit Code:</strong> {{#if analysis.exit_code}}{{analysis.exit_code}}{{else}}N/A{{/if}}</li>
+                                    <li><strong>Status:</strong> {{analysis.status}}</li>
+                                    <li><strong>Risk Category:</strong> {{analysis.threat_assessment.risk_category}}</li>
+                                    <li><strong>Deception Enabled:</strong> {{#if analysis.deception_enabled}}Yes{{else}}No{{/if}}</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="metric-value">{{analysis.threat_assessment.threat_level}}</div>
+                                    <div class="metric-label">Threat Level</div>
+                                    <div class="mt-3">
+                                        <div class="badge bg-{{threat_level_color analysis.threat_assessment.threat_level}} fs-6">
+                                            {{analysis.threat_assessment.risk_category}} Risk
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <div class="metric-value">{{analysis.statistics.total_syscalls}}</div>
+                        <div class="metric-label">System Calls</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <div class="metric-value">{{analysis.statistics.total_file_activities}}</div>
+                        <div class="metric-label">File Activities</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <div class="metric-value">{{analysis.statistics.total_network_activities}}</div>
+                        <div class="metric-label">Network Activities</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card metric-card">
+                    <div class="card-body text-center">
+                        <div class="metric-value">{{analysis.threat_assessment.behavioral_indicators.length}}</div>
+                        <div class="metric-label">Behavioral Indicators</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Threat Assessment -->
+        {{#if config.include_threat_assessment}}
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bug me-2"></i>
+                            Threat Assessment
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Behavioral Indicators -->
+                        {{#if analysis.threat_assessment.behavioral_indicators}}
+                        <h6>Behavioral Indicators</h6>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Description</th>
+                                        <th>Severity</th>
+                                        <th>Confidence</th>
+                                        <th>Evidence</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{#each analysis.threat_assessment.behavioral_indicators}}
+                                    <tr>
+                                        <td><code>{{indicator_type}}</code></td>
+                                        <td>{{description}}</td>
+                                        <td>{{severity_badge severity}}</td>
+                                        <td>{{confidence}}%</td>
+                                        <td>
+                                            {{#each evidence}}
+                                            <small class="text-muted">{{this}}</small><br>
+                                            {{/each}}
+                                        </td>
+                                    </tr>
+                                    {{/each}}
+                                </tbody>
+                            </table>
+                        </div>
+                        {{/if}}
+
+                        <!-- MITRE ATT&CK Techniques -->
+                        {{#if analysis.threat_assessment.mitre_techniques}}
+                        <h6>MITRE ATT&CK Techniques</h6>
+                        <div class="row mb-4">
+                            {{#each analysis.threat_assessment.mitre_techniques}}
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-warning">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <span class="badge bg-warning text-dark me-2">{{technique_id}}</span>
+                                            {{technique_name}}
+                                        </h6>
+                                        <p class="card-text">
+                                            <strong>Tactic:</strong> {{tactic}}<br>
+                                            <small class="text-muted">{{description}}</small>
+                                        </p>
+                                        {{#if evidence}}
+                                        <div class="mt-2">
+                                            <strong>Evidence:</strong>
+                                            <ul class="list-unstyled">
+                                                {{#each evidence}}
+                                                <li><small>• {{this}}</small></li>
+                                                {{/each}}
+                                            </ul>
+                                        </div>
+                                        {{/if}}
+                                    </div>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+
+                        <!-- IOCs -->
+                        {{#if analysis.threat_assessment.iocs}}
+                        <h6>Indicators of Compromise</h6>
+                        <div class="mb-4">
+                            {{#each analysis.threat_assessment.iocs}}
+                            <div class="ioc-item">
+                                <strong>{{ioc_type}}:</strong> <code>{{value}}</code>
+                                <small class="text-muted d-block">{{description}} ({{confidence}}%)</small>
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{/if}}
+
+                        <!-- Recommendations -->
+                        {{#if analysis.threat_assessment.recommendations}}
+                        <h6>Recommendations</h6>
+                        <ul>
+                            {{#each analysis.threat_assessment.recommendations}}
+                            <li>{{this}}</li>
+                            {{/each}}
+                        </ul>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- Statistics Charts -->
+        {{#if config.include_charts}}
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">System Calls Distribution</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="syscallChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">File Activities Distribution</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="fileActivityChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title mb-0">Activity Timeline</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="timelineChart" width="800" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+
+        <!-- Detailed Data Tabs -->
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="detailTabs" role="tablist">
+                            {{#if config.include_syscall_details}}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="syscalls-tab" data-bs-toggle="tab" data-bs-target="#syscalls" type="button" role="tab">
+                                    System Calls ({{analysis.syscalls.length}})
+                                </button>
+                            </li>
+                            {{/if}}
+                            {{#if config.include_file_details}}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="files-tab" data-bs-toggle="tab" data-bs-target="#files" type="button" role="tab">
+                                    File Activities ({{analysis.file_activities.length}})
+                                </button>
+                            </li>
+                            {{/if}}
+                            {{#if config.include_network_details}}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="network-tab" data-bs-toggle="tab" data-bs-target="#network" type="button" role="tab">
+                                    Network Activities ({{analysis.network_activities.length}})
+                                </button>
+                            </li>
+                            {{/if}}
+                            {{#if config.include_timeline}}
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="timeline-tab" data-bs-toggle="tab" data-bs-target="#timeline" type="button" role="tab">
+                                    Timeline
+                                </button>
+                            </li>
+                            {{/if}}
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="detailTabContent">
+                            {{#if config.include_syscall_details}}
+                            <div class="tab-pane fade show active" id="syscalls" role="tabpanel">
+                                {{> syscall_table syscalls=analysis.syscalls}}
+                            </div>
+                            {{/if}}
+                            {{#if config.include_file_details}}
+                            <div class="tab-pane fade" id="files" role="tabpanel">
+                                {{> file_table file_activities=analysis.file_activities}}
+                            </div>
+                            {{/if}}
+                            {{#if config.include_network_details}}
+                            <div class="tab-pane fade" id="network" role="tabpanel">
+                                {{> network_table network_activities=analysis.network_activities}}
+                            </div>
+                            {{/if}}
+                            {{#if config.include_timeline}}
+                            <div class="tab-pane fade" id="timeline" role="tabpanel">
+                                {{> timeline timeline=timeline}}
+                            </div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="row mt-4">
+            <div class="col">
+                <div class="text-center text-muted">
+                    <hr>
+                    <p>
+                        Generated by <strong>IronJail</strong> - Advanced Malware Analysis Sandbox<br>
+                        <small>Report generated on {{format_timestamp generated_at}}</small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {{#if config.include_charts}}
+    <script>
+        // System Calls Chart
+        {{#if statistics_charts.syscall_chart}}
+        const syscallCtx = document.getElementById('syscallChart').getContext('2d');
+        new Chart(syscallCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{{json statistics_charts.syscall_chart.labels}}},
+                datasets: [{
+                    data: {{{json statistics_charts.syscall_chart.values}}},
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                        '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        {{/if}}
+
+        // File Activities Chart
+        {{#if statistics_charts.file_activity_chart}}
+        const fileCtx = document.getElementById('fileActivityChart').getContext('2d');
+        new Chart(fileCtx, {
+            type: 'bar',
+            data: {
+                labels: {{{json statistics_charts.file_activity_chart.labels}}},
+                datasets: [{
+                    label: 'Activities',
+                    data: {{{json statistics_charts.file_activity_chart.values}}},
+                    backgroundColor: '#36A2EB'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {{/if}}
+
+        // Timeline Chart
+        {{#if statistics_charts.timeline_chart}}
+        const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+        const timelineData = {{{json statistics_charts.timeline_chart.buckets}}};
+        
+        new Chart(timelineCtx, {
+            type: 'line',
+            data: {
+                labels: timelineData.map(b => new Date(b.timestamp * 1000).toLocaleTimeString()),
+                datasets: [
+                    {
+                        label: 'System Calls',
+                        data: timelineData.map(b => b.syscalls),
+                        borderColor: '#FF6384',
+                        fill: false
+                    },
+                    {
+                        label: 'File Activities',
+                        data: timelineData.map(b => b.file_activities),
+                        borderColor: '#36A2EB',
+                        fill: false
+                    },
+                    {
+                        label: 'Network Activities',
+                        data: timelineData.map(b => b.network_activities),
+                        borderColor: '#FFCE56',
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        {{/if}}
+    </script>
+    {{/if}}
+</body>
+</html>

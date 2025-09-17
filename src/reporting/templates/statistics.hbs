@@ -1,0 +1,148 @@
+<!-- Statistics Overview -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-cogs fa-2x text-primary mb-2"></i>
+                <h4 class="text-primary">{{total_syscalls}}</h4>
+                <p class="card-text">Total System Calls</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-file fa-2x text-warning mb-2"></i>
+                <h4 class="text-warning">{{total_file_activities}}</h4>
+                <p class="card-text">File Activities</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-network-wired fa-2x text-info mb-2"></i>
+                <h4 class="text-info">{{total_network_activities}}</h4>
+                <p class="card-text">Network Activities</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-folder-open fa-2x text-success mb-2"></i>
+                <h4 class="text-success">{{unique_files_accessed}}</h4>
+                <p class="card-text">Unique Files</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Statistics -->
+<div class="row">
+    <!-- System Calls Breakdown -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Top System Calls</h6>
+            </div>
+            <div class="card-body">
+                {{#each syscalls_by_name}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <code>{{@key}}</code>
+                    <span class="badge bg-primary">{{this}}</span>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
+    <!-- File Activities Breakdown -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">File Activities</h6>
+            </div>
+            <div class="card-body">
+                {{#each file_activities_by_type}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{@key}}</span>
+                    <span class="badge bg-warning">{{this}}</span>
+                </div>
+                {{/each}}
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Unique Files</span>
+                    <span class="badge bg-success">{{unique_files_accessed}}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Bytes Written</span>
+                    <span class="badge bg-info">{{format_bytes total_bytes_written}}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Bytes Read</span>
+                    <span class="badge bg-secondary">{{format_bytes total_bytes_read}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Network Activities Breakdown -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Network Activities</h6>
+            </div>
+            <div class="card-body">
+                {{#each network_activities_by_type}}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{@key}}</span>
+                    <span class="badge bg-info">{{this}}</span>
+                </div>
+                {{/each}}
+                
+                <hr>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>Unique Destinations</span>
+                    <span class="badge bg-primary">{{unique_network_destinations}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Resource Usage -->
+{{#if (or peak_memory_usage cpu_usage_percent)}}
+<div class="row">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Resource Usage</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {{#if peak_memory_usage}}
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-memory me-2"></i>Peak Memory Usage</span>
+                            <span class="badge bg-primary">{{format_bytes peak_memory_usage}}</span>
+                        </div>
+                    </div>
+                    {{/if}}
+                    {{#if cpu_usage_percent}}
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-microchip me-2"></i>CPU Usage</span>
+                            <span class="badge bg-warning">{{cpu_usage_percent}}%</span>
+                        </div>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}

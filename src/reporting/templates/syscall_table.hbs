@@ -1,0 +1,55 @@
+<div class="table-responsive">
+    <table class="table table-sm table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Timestamp</th>
+                <th>PID</th>
+                <th>System Call</th>
+                <th>Arguments</th>
+                <th>Return Value</th>
+                <th>Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each syscalls}}
+            <tr>
+                <td><small>{{format_timestamp timestamp}}</small></td>
+                <td><code>{{pid}}</code></td>
+                <td>
+                    <span class="badge bg-primary">{{syscall_name}}</span>
+                </td>
+                <td>
+                    <div class="code-block">
+                        {{#each args}}
+                        {{#if @index}}, {{/if}}{{this}}
+                        {{/each}}
+                    </div>
+                </td>
+                <td>
+                    {{#if return_value}}
+                    <code class="{{#if (eq return_value "-1")}}text-danger{{else}}text-success{{/if}}">
+                        {{return_value}}
+                    </code>
+                    {{else}}
+                    <span class="text-muted">N/A</span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if duration_ns}}
+                    <small class="text-muted">{{duration_ns}}ns</small>
+                    {{else}}
+                    <span class="text-muted">N/A</span>
+                    {{/if}}
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+{{#unless syscalls}}
+<div class="text-center text-muted py-4">
+    <i class="fas fa-exclamation-circle fa-2x mb-2"></i>
+    <p>No system calls captured</p>
+</div>
+{{/unless}}

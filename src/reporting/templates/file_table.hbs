@@ -1,0 +1,59 @@
+<div class="table-responsive">
+    <table class="table table-sm table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Timestamp</th>
+                <th>PID</th>
+                <th>Activity</th>
+                <th>Path</th>
+                <th>Size Before</th>
+                <th>Size After</th>
+                <th>Permissions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each file_activities}}
+            <tr>
+                <td><small>{{format_timestamp timestamp}}</small></td>
+                <td><code>{{pid}}</code></td>
+                <td>
+                    <span class="badge bg-{{#eq activity_type "Create"}}success{{else}}{{#eq activity_type "Delete"}}danger{{else}}{{#eq activity_type "Modify"}}warning{{else}}info{{/eq}}{{/eq}}{{/eq}}">
+                        {{activity_type}}
+                    </span>
+                </td>
+                <td>
+                    <code class="text-break">{{path}}</code>
+                </td>
+                <td>
+                    {{#if size_before}}
+                    {{format_bytes size_before}}
+                    {{else}}
+                    <span class="text-muted">N/A</span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if size_after}}
+                    {{format_bytes size_after}}
+                    {{else}}
+                    <span class="text-muted">N/A</span>
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if permissions}}
+                    <code>{{permissions}}</code>
+                    {{else}}
+                    <span class="text-muted">N/A</span>
+                    {{/if}}
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>
+
+{{#unless file_activities}}
+<div class="text-center text-muted py-4">
+    <i class="fas fa-folder-open fa-2x mb-2"></i>
+    <p>No file activities captured</p>
+</div>
+{{/unless}}

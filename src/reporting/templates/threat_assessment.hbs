@@ -1,0 +1,192 @@
+<!-- Threat Assessment Details -->
+<div class="row">
+    <!-- Behavioral Indicators -->
+    {{#if behavioral_indicators}}
+    <div class="col-md-6 mb-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Behavioral Indicators
+                </h6>
+            </div>
+            <div class="card-body">
+                {{#each behavioral_indicators}}
+                <div class="border-start border-warning border-3 ps-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">{{indicator_type}}</h6>
+                        <div>
+                            {{severity_badge severity}}
+                            <span class="badge bg-secondary ms-1">{{confidence}}%</span>
+                        </div>
+                    </div>
+                    <p class="text-muted mb-2">{{description}}</p>
+                    {{#if evidence}}
+                    <div class="mt-2">
+                        <strong>Evidence:</strong>
+                        <ul class="list-unstyled ms-3">
+                            {{#each evidence}}
+                            <li><small>• {{this}}</small></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+    <!-- Suspicious Activities -->
+    {{#if suspicious_activities}}
+    <div class="col-md-6 mb-4">
+        <div class="card border-danger">
+            <div class="card-header bg-danger bg-opacity-25">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-skull-crossbones me-2"></i>
+                    Suspicious Activities
+                </h6>
+            </div>
+            <div class="card-body">
+                {{#each suspicious_activities}}
+                <div class="border-start border-danger border-3 ps-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0">{{activity_type}}</h6>
+                        <small class="text-muted">{{format_timestamp timestamp}}</small>
+                    </div>
+                    <p class="text-muted mb-2">{{description}}</p>
+                    {{#if process}}
+                    <p><strong>Process:</strong> <code>{{process}}</code></p>
+                    {{/if}}
+                    {{#if details}}
+                    <div class="mt-2">
+                        <strong>Details:</strong>
+                        <ul class="list-unstyled ms-3">
+                            {{#each details}}
+                            <li><small><strong>{{@key}}:</strong> {{this}}</small></li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                    {{/if}}
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+</div>
+
+<!-- MITRE ATT&CK Techniques -->
+{{#if mitre_techniques}}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-primary">
+            <div class="card-header bg-primary bg-opacity-25">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-crosshairs me-2"></i>
+                    MITRE ATT&CK Techniques
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {{#each mitre_techniques}}
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <span class="badge bg-primary me-2">{{technique_id}}</span>
+                                    {{technique_name}}
+                                </h6>
+                                <p class="card-text">
+                                    <strong>Tactic:</strong> {{tactic}}<br>
+                                    <small class="text-muted">{{description}}</small>
+                                </p>
+                                {{#if evidence}}
+                                <div class="mt-2">
+                                    <strong>Evidence:</strong>
+                                    <ul class="list-unstyled">
+                                        {{#each evidence}}
+                                        <li><small>• {{this}}</small></li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                                {{/if}}
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+
+<!-- Indicators of Compromise -->
+{{#if iocs}}
+<div class="row mb-4">
+    <div class="col">
+        <div class="card border-info">
+            <div class="card-header bg-info bg-opacity-25">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-fingerprint me-2"></i>
+                    Indicators of Compromise
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {{#each iocs}}
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <span class="badge bg-info me-2">{{ioc_type}}</span>
+                                </h6>
+                                <p class="card-text">
+                                    <code class="text-break">{{value}}</code><br>
+                                    <small class="text-muted">{{description}}</small>
+                                </p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">
+                                        First: {{format_timestamp first_seen}}<br>
+                                        Last: {{format_timestamp last_seen}}
+                                    </small>
+                                    <span class="badge bg-secondary">{{confidence}}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
+
+<!-- Recommendations -->
+{{#if recommendations}}
+<div class="row">
+    <div class="col">
+        <div class="card border-success">
+            <div class="card-header bg-success bg-opacity-25">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Recommendations
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {{#each recommendations}}
+                    <li class="list-group-item d-flex align-items-start">
+                        <i class="fas fa-check-circle text-success me-2 mt-1"></i>
+                        <span>{{this}}</span>
+                    </li>
+                    {{/each}}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
