@@ -279,8 +279,11 @@ impl FileSystemMonitor {
             let events = match inotify.read_events(&mut buffer) {
                 Ok(events) => events,
                 Err(e) => {
-                    error!("Failed to read inotify events: {}", e);
-                    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+                    // Log error but don't spam - sleep longer on errors
+                    if e.kind() != std::io::ErrorKind::WouldBlock {
+                        error!("Failed to read inotify events: {}", e);
+                    }
+                    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
                     continue;
                 }
             };

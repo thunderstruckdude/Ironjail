@@ -232,7 +232,19 @@ async fn run_analysis(
     
     // Generate report
     let report_generator = ReportGenerator::new(&output)?;
-    report_generator.generate_comprehensive_report(&analysis_result, &session_id).await?;
+    use ironjail::reporting::{ReportConfig, ReportFormat};
+    let config = ReportConfig {
+        format: ReportFormat::Both,
+        output_filename: Some(session_id.clone()),
+        include_timeline: true,
+        include_syscall_details: true,
+        include_file_details: true,
+        include_network_details: true,
+        include_threat_assessment: true,
+        include_charts: true,
+        custom_template: None,
+    };
+    report_generator.generate_report(&analysis_result, &config).await?;
     
     info!("Analysis completed. Reports saved to: {:?}", output);
     println!("Session ID: {}", session_id);
@@ -265,20 +277,37 @@ async fn generate_report(session: String, format: String, output: Option<PathBuf
     
     let report_generator = ReportGenerator::new(&PathBuf::from("reports"))?;
     
-    match format.as_str() {
-        "json" => {
-            let output_path = output.unwrap_or_else(|| PathBuf::from(format!("{}_report.json", session)));
-            report_generator.generate_json_report(&session, &output_path).await?;
-        }
-        "html" => {
-            let output_path = output.unwrap_or_else(|| PathBuf::from(format!("{}_report.html", session)));
-            report_generator.generate_html_report(&session, &output_path).await?;
-        }
+    // Load the analysis result
+    let analysis_result = report_generator.load_analysis(&session).await?;
+    
+    use ironjail::reporting::{ReportConfig, ReportFormat};
+    
+    let report_format = match format.as_str() {
+        "json" => ReportFormat::Json,
+        "html" => ReportFormat::Html,
         _ => {
             error!("Unsupported report format: {}", format);
             return Err(anyhow::anyhow!("Unsupported report format: {}", format));
         }
-    }
+    };
+    
+    let filename = output
+        .map(|p| p.file_stem().unwrap().to_str().unwrap().to_string())
+        .unwrap_or_else(|| format!("{}_report", session));
+    
+    let config = ReportConfig {
+        format: report_format,
+        output_filename: Some(filename),
+        include_timeline: true,
+        include_syscall_details: true,
+        include_file_details: true,
+        include_network_details: true,
+        include_threat_assessment: true,
+        include_charts: true,
+        custom_template: None,
+    };
+    
+    report_generator.generate_report(&analysis_result, &config).await?;
     
     println!("✅ Report generated successfully");
     Ok(())

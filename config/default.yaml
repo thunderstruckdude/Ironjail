@@ -1,0 +1,165 @@
+# IronJail Default Configuration
+# This file contains the default settings for the IronJail malware analysis sandbox
+
+metadata:
+  name: "IronJail Default Configuration"
+  description: "Default configuration for IronJail sandbox"
+  version: "1.0.0"
+  author: "IronJail Team"
+
+# Sandbox configuration
+sandbox:
+  # Default timeout for analysis (seconds)
+  default_timeout: 300
+  
+  # Sandbox root directory where isolated processes run
+  sandbox_root: "/tmp/ironjail-sandbox"
+  
+  # Maximum memory usage (MB)
+  max_memory_mb: 1024
+  
+  # Enable namespace isolation
+  enable_namespaces: true
+  
+  # Enable seccomp filtering
+  enable_seccomp: true
+
+# Monitoring settings
+monitoring:
+  # Enable system call tracing
+  trace_syscalls: true
+  
+  # Enable file system monitoring
+  monitor_filesystem: true
+  
+  # Enable network monitoring
+  monitor_network: true
+  
+  # Capture network packets
+  capture_packets: false
+  
+  # Log level (trace, debug, info, warn, error)
+  log_level: "info"
+
+# Reporting settings
+reporting:
+  # Output directory for reports
+  output_dir: "./reports"
+  
+  # Default report format (json, html, both)
+  default_format: "both"
+  
+  # Include detailed system call traces in reports
+  include_syscall_details: true
+  
+  # Include file activity details
+  include_file_details: true
+  
+  # Include network activity details
+  include_network_details: true
+  
+  # Include timeline visualization
+  include_timeline: true
+  
+  # Include threat assessment
+  include_threat_assessment: true
+
+# Security settings
+security:
+  # Drop capabilities after sandbox setup
+  drop_capabilities: true
+  
+  # Enable environment deception
+  enable_deception: true
+  
+  # Allowed environment variables to pass through
+  allowed_env_vars:
+    - "PATH"
+    - "HOME"
+    - "USER"
+    - "SHELL"
+    - "LANG"
+    - "TERM"
+  
+  # Blocked environment variables
+  blocked_env_vars:
+    - "LD_PRELOAD"
+    - "LD_LIBRARY_PATH"
+
+# Resource limits
+limits:
+  # Maximum number of processes
+  max_processes: 100
+  
+  # Maximum number of open files
+  max_open_files: 1024
+  
+  # Maximum file size (MB)
+  max_file_size_mb: 100
+  
+  # Maximum network bandwidth (KB/s)
+  max_network_bandwidth_kbps: 1024
+  
+  # CPU time limit (seconds)
+  max_cpu_time: 300
+
+# Default policies
+policies:
+  # File access rules
+  file_access:
+    # Allow read/write in temp directory
+    - path: "/tmp/*"
+      action: "allow"
+      operations: ["read", "write", "create", "delete"]
+    
+    # Log access to system directories
+    - path: "/etc/*"
+      action: "log"
+      operations: ["read"]
+    
+    - path: "/proc/*"
+      action: "log"
+      operations: ["read"]
+    
+    # Block access to sensitive directories
+    - path: "/root/*"
+      action: "block"
+      operations: ["read", "write", "create", "delete"]
+  
+  # Network access rules
+  network_access:
+    # Log HTTP/HTTPS traffic
+    - host: "*"
+      port: 80
+      protocol: "tcp"
+      action: "log"
+    
+    - host: "*"
+      port: 443
+      protocol: "tcp"
+      action: "log"
+    
+    # Block SSH
+    - host: "*"
+      port: 22
+      protocol: "tcp"
+      action: "block"
+  
+  # System call rules
+  system_calls:
+    # Log dangerous system calls
+    - name: "execve"
+      action: "log"
+    
+    - name: "connect"
+      action: "log"
+    
+    - name: "socket"
+      action: "log"
+    
+    # Block dangerous operations
+    - name: "ptrace"
+      action: "block"
+    
+    - name: "mount"
+      action: "block"

@@ -1,0 +1,126 @@
+# IronJail Demo Policy
+# Optimized for demonstration and testing purposes
+
+metadata:
+  name: "Demo Policy"
+  description: "IronJail policy optimized for demonstrations"
+  version: "1.0.0"
+  author: "IronJail Demo"
+  created: "2025-09-18T00:00:00Z"
+  modified: "2025-09-18T00:00:00Z"
+  tags:
+    - "demo"
+    - "testing"
+
+# Permissive rules for demo purposes
+rules:
+  file_access:
+    # Allow all operations in demo directories
+    - path: "/tmp/*"
+      action: "Allow"
+      operations: ["read", "write", "create", "delete"]
+      conditions: {}
+    
+    - path: "/home/*/demo-samples/*"
+      action: "Allow" 
+      operations: ["read", "write", "create"]
+      conditions: {}
+    
+    # Log system file access
+    - path: "/etc/*"
+      action: "Log"
+      operations: ["read"]
+      conditions: {}
+    
+    - path: "/proc/*"
+      action: "Log"
+      operations: ["read"]
+      conditions: {}
+
+  network_access:
+    # Log all network attempts for demo
+    - host: "*"
+      port: "*"
+      protocol: "tcp"
+      action: "Log"
+      conditions: {}
+    
+    - host: "*"
+      port: "*"
+      protocol: "udp"
+      action: "Log"
+      conditions: {}
+
+  system_calls:
+    # Log important system calls
+    - name: "execve"
+      action: "Log"
+      arguments: []
+      conditions: {}
+    
+    - name: "connect"
+      action: "Log"
+      arguments: []
+      conditions: {}
+    
+    - name: "socket"
+      action: "Log"
+      arguments: []
+      conditions: {}
+    
+    - name: "open"
+      action: "Log"
+      arguments: []
+      conditions: {}
+    
+    - name: "write"
+      action: "Log"
+      arguments: []
+      conditions: {}
+
+# Resource limits suitable for demo
+resource_limits:
+  max_memory: 512          # MB
+  max_cpu_time: 60         # seconds
+  max_processes: 50
+  max_open_files: 512
+  max_file_size: 50        # MB
+  max_network_bandwidth: 512 # KB/s
+
+# Environment settings
+environment:
+  allowed_env_vars:
+    - "PATH"
+    - "HOME"
+    - "USER"
+    - "SHELL"
+    - "LANG"
+    - "TERM"
+    - "PWD"
+  
+  blocked_env_vars:
+    - "LD_PRELOAD"
+    - "LD_LIBRARY_PATH"
+  
+  env_overrides: {}
+  
+  allowed_working_dirs:
+    - "/tmp"
+    - "/home/*/demo-samples"
+  
+  allowed_shells:
+    - "/bin/bash"
+    - "/bin/sh"
+    - "/bin/zsh"
+
+# Monitoring configuration
+monitoring:
+  trace_syscalls: true
+  traced_syscalls: []
+  monitor_filesystem: true
+  monitored_directories:
+    - "/tmp"
+    - "/home"
+  monitor_network: true
+  capture_packets: true
+  log_level: "info"

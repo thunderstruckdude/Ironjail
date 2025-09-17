@@ -8,7 +8,7 @@ use std::ffi::CString;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tokio::sync::RwLock;
-use tracing::{debug, warn, error};
+use tracing::{debug, info, error, warn};
 
 /// Manages process execution and lifecycle within the sandbox
 pub struct ProcessManager {
@@ -212,11 +212,10 @@ impl ProcessManager {
             format!("Failed to create new session: {}", e)
         ))?;
         
-        // Set process group
-        setpgid(Pid::this(), Pid::from_raw(0))
-            .map_err(|e| IronJailError::ProcessExecution(
-                format!("Failed to set process group: {}", e)
-            ))?;
+        // Set process group (non-fatal if it fails)
+        if let Err(e) = setpgid(Pid::this(), Pid::from_raw(0)) {
+            warn!("Failed to set process group (continuing anyway): {}", e);
+        }
         
         Ok(())
     }
