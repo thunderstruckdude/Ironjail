@@ -95,6 +95,8 @@ impl ReportGenerator {
         handlebars.register_helper("format_bytes", Box::new(format_bytes_helper));
         handlebars.register_helper("threat_level_color", Box::new(threat_level_color_helper));
         handlebars.register_helper("severity_badge", Box::new(severity_badge_helper));
+        handlebars.register_helper("len", Box::new(len_helper));
+        handlebars.register_helper("json", Box::new(json_helper));
         
         // Create output directory if it doesn't exist
         fs::create_dir_all(output_dir)?;
@@ -550,6 +552,43 @@ fn severity_badge_helper(
             };
             out.write(&format!("<span class=\"badge bg-{}\">{}</span>", color, text))?;
         }
+    }
+    Ok(())
+}
+
+fn len_helper(
+    h: &handlebars::Helper,
+    _: &handlebars::Handlebars,
+    _: &handlebars::Context,
+    _: &mut handlebars::RenderContext,
+    out: &mut dyn handlebars::Output,
+) -> handlebars::HelperResult {
+    if let Some(param) = h.param(0) {
+        if let Some(array) = param.value().as_array() {
+            out.write(&array.len().to_string())?;
+        } else {
+            out.write("0")?;
+        }
+    } else {
+        out.write("0")?;
+    }
+    Ok(())
+}
+
+fn json_helper(
+    h: &handlebars::Helper,
+    _: &handlebars::Handlebars,
+    _: &handlebars::Context,
+    _: &mut handlebars::RenderContext,
+    out: &mut dyn handlebars::Output,
+) -> handlebars::HelperResult {
+    if let Some(param) = h.param(0) {
+        match serde_json::to_string(param.value()) {
+            Ok(json_str) => out.write(&json_str)?,
+            Err(_) => out.write("null")?,
+        }
+    } else {
+        out.write("null")?;
     }
     Ok(())
 }

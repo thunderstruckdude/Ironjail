@@ -1,0 +1,40 @@
+{
+  "session_id": "session_20250917_203928",
+  "binary": "./test_script.sh",
+  "args": [],
+  "start_timestamp": "2025-09-17T20:39:28.248650774Z",
+  "end_timestamp": "2025-09-17T20:39:28.349210445Z",
+  "duration": 0,
+  "exit_code": 0,
+  "status": "completed",
+  "error": null,
+  "syscalls": [],
+  "file_activities": [],
+  "network_activities": [],
+  "process_activities": [],
+  "deception_enabled": false,
+  "statistics": {
+    "total_syscalls": 0,
+    "syscalls_by_name": {},
+    "total_file_activities": 0,
+    "file_activities_by_type": {},
+    "total_network_activities": 0,
+    "network_activities_by_type": {},
+    "unique_files_accessed": 0,
+    "unique_network_destinations": 0,
+    "total_bytes_written": 0,
+    "total_bytes_read": 0,
+    "peak_memory_usage": null,
+    "cpu_usage_percent": null
+  },
+  "threat_assessment": {
+    "threat_level": 0,
+    "risk_category": "",
+    "behavioral_indicators": [],
+    "suspicious_activities": [],
+    "mitre_techniques": [],
+    "iocs": [],
+    "recommendations": []
+  },
+  "metadata": {}
+}
