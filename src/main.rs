@@ -192,26 +192,37 @@ async fn run_analysis(
     timeout: u64,
 ) -> Result<()> {
     info!("Starting malware analysis for: {:?}", binary);
+    info!("Debug: Function entry - run_analysis");
     
     // Load configuration
+    info!("Debug: Loading configuration from: {:?}", config_path);
     let config = SandboxConfig::load(config_path)?;
+    info!("Debug: Configuration loaded successfully");
     
     // Load policy if specified
+    info!("Debug: Loading policy manager");
     let policy_manager = if let Some(policy_path) = policy {
+        info!("Debug: Loading policy from: {:?}", policy_path);
         PolicyManager::from_file(&policy_path)?
     } else {
+        info!("Debug: Using default policy");
         PolicyManager::default()
     };
+    info!("Debug: Policy loaded successfully");
     
     // Create sandbox engine
+    info!("Debug: Creating sandbox engine");
     let mut sandbox = SandboxEngine::new(config)?;
+    info!("Debug: Sandbox engine created successfully");
     
     // Configure sandbox options
+    info!("Debug: Configuring sandbox options");
     sandbox.set_capture_network(capture_network);
     sandbox.set_enable_deception(enable_deception);
     sandbox.set_timeout(timeout);
     
     if let Some(wd) = workdir {
+        info!("Debug: Setting working directory: {:?}", wd);
         sandbox.set_working_directory(wd);
     }
     
@@ -221,6 +232,7 @@ async fn run_analysis(
     });
     
     info!("Session ID: {}", session_id);
+    info!("Debug: About to execute with monitoring - THIS IS THE CRITICAL POINT");
     
     // Run the analysis
     let analysis_result = sandbox.execute_with_monitoring(
@@ -229,6 +241,8 @@ async fn run_analysis(
         &policy_manager,
         &session_id,
     ).await?;
+    
+    info!("Debug: Analysis completed successfully");
     
     // Generate report
     let report_generator = ReportGenerator::new(&output)?;

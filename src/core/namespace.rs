@@ -80,12 +80,32 @@ impl NamespaceManager {
             self.active_namespaces.insert(NamespaceType::Uts, true);
         }
         
-        // Create namespaces using unshare
+        // Create namespaces individually (more tolerant approach)
         if !clone_flags.is_empty() {
-            sched::unshare(clone_flags)
-                .map_err(|e| IronJailError::SandboxInit(
-                    format!("Failed to create namespaces: {}", e)
-                ))?;
+            // Try to create namespaces one by one for better error handling
+            let individual_flags = [
+                (CloneFlags::CLONE_NEWUSER, NamespaceType::User, "user"),
+                (CloneFlags::CLONE_NEWPID, NamespaceType::Pid, "pid"),
+                (CloneFlags::CLONE_NEWNET, NamespaceType::Network, "network"),
+                (CloneFlags::CLONE_NEWNS, NamespaceType::Mount, "mount"),
+                (CloneFlags::CLONE_NEWIPC, NamespaceType::Ipc, "ipc"),
+                (CloneFlags::CLONE_NEWUTS, NamespaceType::Uts, "uts"),
+            ];
+            
+            for (flag, ns_type, name) in individual_flags {
+                if clone_flags.contains(flag) {
+                    match sched::unshare(flag) {
+                        Ok(_) => {
+                            debug!("Successfully created {} namespace", name);
+                        }
+                        Err(e) => {
+                            warn!("Failed to create {} namespace (continuing): {}", name, e);
+                            // Remove from active namespaces if creation failed
+                            self.active_namespaces.remove(&ns_type);
+                        }
+                    }
+                }
+            }
         }
         
         // Setup specific namespace configurations

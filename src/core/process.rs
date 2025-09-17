@@ -141,8 +141,28 @@ impl ProcessManager {
     ) -> Result<i32> {
         debug!("Executing process: {:?} with args: {:?}", binary, args);
         
+        // Convert to absolute path to avoid issues with working directory changes
+        let absolute_binary = if binary.is_absolute() {
+            binary.clone()
+        } else {
+            std::env::current_dir()
+                .map_err(|e| IronJailError::ProcessExecution(
+                    format!("Failed to get current directory: {}", e)
+                ))?
+                .join(binary)
+        };
+        
+        debug!("Using absolute binary path: {:?}", absolute_binary);
+        
+        // Verify the binary exists and is executable
+        if !absolute_binary.exists() {
+            return Err(IronJailError::ProcessExecution(
+                format!("Binary not found: {:?}", absolute_binary)
+            ).into());
+        }
+        
         // Prepare arguments for execv
-        let binary_cstring = CString::new(binary.to_string_lossy().as_bytes())
+        let binary_cstring = CString::new(absolute_binary.to_string_lossy().as_bytes())
             .map_err(|e| IronJailError::ProcessExecution(
                 format!("Invalid binary path: {}", e)
             ))?;

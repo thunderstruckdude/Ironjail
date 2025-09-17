@@ -118,23 +118,33 @@ impl SandboxEngine {
     ) -> Result<AnalysisResult> {
         info!("Starting analysis session: {}", session_id);
         info!("Executing binary: {:?} with args: {:?}", binary, args);
+        info!("DEBUG: execute_with_monitoring entered");
         
         // Validate binary exists and is executable
+        info!("DEBUG: Checking if binary exists: {:?}", binary);
         if !binary.exists() {
+            error!("DEBUG: Binary not found: {:?}", binary);
             return Err(IronJailError::ResourceNotFound(
                 format!("Binary not found: {:?}", binary)
             ).into());
         }
+        info!("DEBUG: Binary exists and validated");
         
         // Create analysis result structure
+        info!("DEBUG: Creating analysis result structure");
         let mut analysis_result = AnalysisResult::new(session_id, binary, args);
         analysis_result.start_timestamp = chrono::Utc::now();
+        info!("DEBUG: Analysis result created");
         
         // Setup sandbox environment
+        info!("DEBUG: Setting up sandbox environment");
         self.setup_sandbox_environment(session_id).await?;
+        info!("DEBUG: Sandbox environment setup complete");
         
         // Start monitoring services
+        info!("DEBUG: Starting monitoring services - CRITICAL POINT");
         let monitoring_handles = self.start_monitoring_services(session_id).await?;
+        info!("DEBUG: Monitoring services started successfully");
         
         // Setup environment deception if enabled
         if self.enable_deception {
@@ -210,25 +220,43 @@ impl SandboxEngine {
     /// Start all monitoring services
     async fn start_monitoring_services(&mut self, session_id: &str) -> Result<MonitoringHandles> {
         debug!("Starting monitoring services for session: {}", session_id);
+        info!("DEBUG: start_monitoring_services entered");
         
         let mut handles = MonitoringHandles::default();
+        info!("DEBUG: MonitoringHandles created");
         
         // Start system call tracing
+        info!("DEBUG: Checking syscall tracer");
         if let Some(ref mut tracer) = self.syscall_tracer {
+            info!("DEBUG: Starting syscall tracing - POTENTIAL CRASH POINT 1");
             handles.syscall_handle = Some(tracer.start_tracing(session_id).await?);
+            info!("DEBUG: Syscall tracing started successfully");
+        } else {
+            info!("DEBUG: No syscall tracer configured");
         }
         
         // Start file system monitoring
+        info!("DEBUG: Checking filesystem monitor");
         if let Some(ref mut monitor) = self.fs_monitor {
+            info!("DEBUG: Starting filesystem monitoring - POTENTIAL CRASH POINT 2");
             handles.fs_handle = Some(monitor.start_monitoring(session_id).await?);
+            info!("DEBUG: Filesystem monitoring started successfully");
+        } else {
+            info!("DEBUG: No filesystem monitor configured");
         }
         
         // Start network monitoring
+        info!("DEBUG: Checking network monitor");
         if let Some(ref mut monitor) = self.network_monitor {
+            info!("DEBUG: Starting network monitoring - POTENTIAL CRASH POINT 3");
             handles.network_handle = Some(monitor.start_monitoring(session_id, self.capture_network).await?);
+            info!("DEBUG: Network monitoring started successfully");
+        } else {
+            info!("DEBUG: No network monitor configured");
         }
         
         debug!("All monitoring services started");
+        info!("DEBUG: start_monitoring_services completed successfully");
         Ok(handles)
     }
     

@@ -1,0 +1,62 @@
+# Minimal IronJail Configuration for Debugging
+# This configuration disables most features to isolate issues
+
+general:
+  default_timeout: 30
+  sandbox_root: "/tmp/ironjail-minimal"
+  temp_dir: "/tmp/ironjail-temp"
+  log_level: "debug"
+  verbose_logging: true
+
+security:
+  enable_user_namespace: false
+  enable_network_namespace: false
+  enable_pid_namespace: false
+  enable_mount_namespace: false
+  enable_ipc_namespace: false
+  enable_uts_namespace: false
+  enable_seccomp: false
+  drop_capabilities: []
+  keep_capabilities: []
+  no_new_privileges: false
+
+monitoring:
+  enable_syscall_tracing: false
+  enable_fs_monitoring: false
+  enable_network_monitoring: false
+  enable_process_monitoring: false
+  traced_syscalls: []
+  monitored_directories: []
+  monitored_interfaces: []
+  enable_packet_capture: false
+  max_log_size: 100
+
+deception:
+  enable_deception: false
+  fake_proc: {}
+  fake_sys: {}
+  fake_env: {}
+  fake_hostname: null
+  fake_system_info:
+    cpu_info: null
+    memory_info: null
+    kernel_version: null
+    distro_info: null
+  decoy_files: []
+  network_redirects: []
+
+limits:
+  max_memory: null
+  max_cpu_time: null
+  max_processes: null
+  max_file_descriptors: null
+  max_file_size: null
+  max_disk_usage: null
+
+network:
+  isolate_network: false
+  allow_loopback: true
+  allowed_ports: []
+  blocked_domains: []
+  dns_servers: []
+  enable_fake_responses: false
