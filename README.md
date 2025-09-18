@@ -412,12 +412,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Security researchers who provided feedback and testing
 - Open source projects that inspired this work
 
-## 🔒 Security
-
-If you discover a security vulnerability, please send an email to security@ironjail.dev. All security vulnerabilities will be promptly addressed.
-
----
-
 <p align="center">
   Made with ❤️ by the IronJail team
 </p>
